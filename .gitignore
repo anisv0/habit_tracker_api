@@ -4,6 +4,9 @@
 /build
 *.tsbuildinfo
 
+# cliente generado por Prisma
+/generated
+
 # Logs
 logs
 *.log
