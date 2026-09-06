@@ -1,0 +1,307 @@
+{
+  "info": {
+    "name": "Habit Tracker API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "habitId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Registro",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "description": "Registro de usuarios. En Compass, la coleccion User muestra la contrasena encriptada con bcrypt. Si el correo ya existe responde 409.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ana Valle\",\n  \"email\": \"ana@test.com\",\n  \"password\": \"123456\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Inicio de sesion con JWT. Devuelve el token y lo guarda solo en la variable token.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"ana@test.com\",\n  \"password\": \"123456\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Crear habito",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/habits",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "habits"
+          ]
+        },
+        "description": "CRUD - CREATE. Persistencia en MongoDB: refrescar Compass y aparece en la coleccion Habit.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Ir al gimnasio\",\n  \"description\": \"Tres veces por semana\",\n  \"color\": \"#4A0D18\",\n  \"icon\": \"gym\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"habitId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Listar habitos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/habits",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "habits"
+          ]
+        },
+        "description": "CRUD - READ. Solo devuelve los habitos del usuario del token."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Editar habito",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/habits/{{habitId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "habits",
+            "{{habitId}}"
+          ]
+        },
+        "description": "CRUD - UPDATE. Cambia el nombre y actualiza updatedAt automaticamente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Gimnasio en la manana\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Marcar cumplido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/habits/{{habitId}}/records",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "habits",
+            "{{habitId}}",
+            "records"
+          ]
+        },
+        "description": "Tercera coleccion, HabitRecord. Repetirlo responde 409 por la regla @@unique([habitId, date]).",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Resumen del dashboard",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/stats/summary",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "stats",
+            "summary"
+          ]
+        },
+        "description": "Datos del dashboard: total de habitos, cumplidos hoy, porcentaje, racha y ultimos 7 dias."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Eliminar habito",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/habits/{{habitId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "habits",
+            "{{habitId}}"
+          ]
+        },
+        "description": "CRUD - DELETE. Borra el habito y sus registros. Refrescar Compass y ya no esta."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Sin token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/habits",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "habits"
+          ]
+        },
+        "description": "Prueba de seguridad. Debe responder 401 porque no lleva token.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "response": []
+    }
+  ]
+}
