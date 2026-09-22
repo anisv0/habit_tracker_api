@@ -20,8 +20,8 @@ export class HabitsController {
   constructor(private readonly habitsService: HabitsService) {}
 
   @Post()
-  create(@UsuarioActual() userId: string, @Body() dto: CreateHabitDto) {
-    return this.habitsService.create(userId, dto);
+  create(@UsuarioActual() userId: string, @Body() createHabitDto: CreateHabitDto) {
+    return this.habitsService.create(userId, createHabitDto);
   }
 
   @Get()
@@ -38,9 +38,9 @@ export class HabitsController {
   update(
     @UsuarioActual() userId: string,
     @Param('id') id: string,
-    @Body() dto: UpdateHabitDto,
+    @Body() updateHabitDto: UpdateHabitDto,
   ) {
-    return this.habitsService.update(userId, id, dto);
+    return this.habitsService.update(userId, id, updateHabitDto);
   }
 
   @Delete(':id')

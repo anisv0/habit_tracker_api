@@ -21,9 +21,9 @@ export class RecordsController {
   marcar(
     @UsuarioActual() userId: string,
     @Param('habitId') habitId: string,
-    @Body() dto: CreateRecordDto,
+    @Body() createRecordDto: CreateRecordDto,
   ) {
-    return this.recordsService.marcar(userId, habitId, dto);
+    return this.recordsService.marcar(userId, habitId, createRecordDto);
   }
 
   @Get()

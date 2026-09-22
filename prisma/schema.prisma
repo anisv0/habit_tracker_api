@@ -23,6 +23,7 @@ model Habit {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
+  category    String?
   color       String   @default("#4A0D18")
   icon        String   @default("check")
   active      Boolean  @default(true)

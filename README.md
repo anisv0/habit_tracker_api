@@ -1,114 +1,176 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Habit Tracker API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST para crear hábitos, marcar los días cumplidos y consultar estadísticas de seguimiento.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este repositorio contiene únicamente el backend. La interfaz web vive en un repositorio aparte: [habit_tracker_web](https://github.com/anisv0/habit_tracker_web).
 
-## Description
+## Tecnologías
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Herramienta | Uso |
+| --- | --- |
+| NestJS | Framework del servidor |
+| Prisma 6 | ORM y acceso a la base de datos |
+| MongoDB | Base de datos (requiere replica set) |
+| JWT | Autenticación por token |
+| bcryptjs | Cifrado de contraseñas |
+| class-validator | Validación de los datos que entran |
 
-## Project setup
+## Requisitos
+
+- Node.js 20 o superior
+- pnpm
+- Docker, para levantar MongoDB en local
+
+## Instalación
 
 ```bash
-$ pnpm install
+pnpm install
 ```
 
-## Compile and run the project
+## Variables de entorno
+
+Crear un archivo `.env` en la raíz con estas dos variables:
+
+```
+DATABASE_URL=
+JWT_SECRET=
+```
+
+- `DATABASE_URL`: cadena de conexión de MongoDB, incluyendo el nombre de la base.
+- `JWT_SECRET`: texto secreto con el que se firman los tokens.
+
+Opcionalmente, `WEB_URL` define la dirección del frontend autorizada por CORS. Si no se indica, se usa `http://localhost:3000`.
+
+El archivo `.env` está excluido del repositorio. En `.env.example` están los nombres de las variables sin valores.
+
+## Base de datos
+
+Prisma con MongoDB necesita que el servidor esté configurado como replica set. Para levantarlo en local:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+docker run -d --name mongo -p 27017:27017 mongo:7 --replSet rs0
+docker exec -it mongo mongosh --eval "rs.initiate()"
 ```
 
-## Run tests
+Con eso, la conexión queda así:
+
+```
+DATABASE_URL=mongodb://localhost:27017/habittracker?replicaSet=rs0&directConnection=true
+```
+
+Luego generar el cliente y crear las colecciones:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm prisma generate
+pnpm prisma db push
 ```
 
-## Deployment
+Estos dos comandos se vuelven a ejecutar cada vez que se modifica `prisma/schema.prisma`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Ejecución
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+El servidor queda en `http://localhost:3001`. Todas las rutas usan el prefijo `/api`.
 
-## Observability
+## Modelos
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+| Modelo | Descripción |
+| --- | --- |
+| `User` | Cuenta de la persona: nombre, correo y contraseña cifrada |
+| `Habit` | Hábito creado por un usuario: nombre, descripción, categoría y color |
+| `HabitRecord` | Un día marcado como cumplido para un hábito |
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+Un usuario tiene muchos hábitos y un hábito tiene muchos registros. Al borrar un usuario se borran sus hábitos, y al borrar un hábito se borran sus registros.
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+## Endpoints
 
-## Resources
+| Método | Ruta | Descripción | Token |
+| --- | --- | --- | --- |
+| POST | `/api/auth/register` | Crear cuenta | No |
+| POST | `/api/auth/login` | Iniciar sesión | No |
+| GET | `/api/auth/me` | Datos del usuario de la sesión | Sí |
+| GET | `/api/habits` | Listar los hábitos del usuario | Sí |
+| POST | `/api/habits` | Crear un hábito | Sí |
+| GET | `/api/habits/:id` | Ver un hábito | Sí |
+| PATCH | `/api/habits/:id` | Editar un hábito | Sí |
+| DELETE | `/api/habits/:id` | Eliminar un hábito | Sí |
+| POST | `/api/habits/:id/records` | Marcar un día como cumplido | Sí |
+| GET | `/api/habits/:id/records` | Historial de un hábito | Sí |
+| DELETE | `/api/habits/:id/records/:fecha` | Desmarcar un día | Sí |
+| GET | `/api/stats/summary` | Resumen para el panel principal | Sí |
 
-Check out a few resources that may come in handy when working with NestJS:
+Las rutas marcadas con token requieren el encabezado `Authorization: Bearer <token>`. El token se obtiene al registrarse o iniciar sesión y vence a los 7 días.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Arquitectura
 
-## Support
+El sistema está dividido en tres partes que se comunican por HTTP:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+Navegador
+    │
+    ▼
+Frontend  ·  Next.js + React          habit_tracker_web
+    │        pantallas y formularios
+    │
+    │  peticiones HTTP con el token en el encabezado
+    ▼
+Backend  ·  NestJS                    este repositorio
+    │
+    │   ┌─ ValidationPipe    revisa que los datos entren bien
+    │   ├─ JwtAuthGuard      revisa el token y saca el userId
+    │   ├─ Controlador       define la ruta y recibe la petición
+    │   ├─ Servicio          aplica la lógica del negocio
+    │   └─ ErroresFilter     traduce cualquier fallo a un mensaje claro
+    │
+    ▼
+Prisma  ·  ORM
+    │        traduce el código TypeScript a consultas
+    ▼
+MongoDB  ·  base de datos
+```
 
-## Stay in touch
+### Recorrido de una petición
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. El frontend envía la petición con el encabezado `Authorization: Bearer <token>`.
+2. El `JwtAuthGuard` verifica la firma del token y coloca el `userId` en la petición.
+3. El `ValidationPipe` revisa el cuerpo contra el DTO correspondiente y descarta campos no declarados.
+4. El controlador recibe el `userId` mediante el decorador `UsuarioActual` y llama al servicio.
+5. El servicio consulta la base filtrando siempre por ese `userId`, de modo que un usuario solo alcanza sus propios datos.
+6. Si algo falla en cualquier punto, el `ErroresFilter` convierte el error en una respuesta con código y mensaje entendible.
 
-## License
+### Estructura del código
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```
+src/
+├── auth/       registro, inicio de sesión y verificación del token
+├── habits/     creación, consulta, edición y borrado de hábitos
+├── records/    marcar y desmarcar días
+├── stats/      cálculo de rachas y porcentajes
+├── prisma/     conexión con la base de datos
+├── common/     filtro global de errores
+└── main.ts     arranque del servidor
+```
+
+El código está organizado por dominio: cada carpeta agrupa todo lo de un mismo tema del negocio, en lugar de separar por tipo de archivo. Dentro de cada dominio la organización es siempre la misma: el controlador recibe la petición y define la ruta, el servicio contiene la lógica, el módulo conecta ambos y la carpeta `dto` define qué datos se aceptan y con qué reglas.
+
+### Manejo de errores
+
+`common/errores.filter.ts` captura toda excepción que llegue al servidor y devuelve siempre la misma forma de respuesta:
+
+```json
+{
+  "statusCode": 404,
+  "message": "Habito no encontrado",
+  "path": "/api/habits/abc123",
+  "timestamp": "2026-09-21T15:04:05.000Z"
+}
+```
+
+Traduce además los errores de Prisma a mensajes comprensibles: un registro duplicado devuelve 409, un identificador con formato inválido devuelve 400 y una base de datos caída devuelve 503. Los errores no previstos se registran en consola con su traza y responden 500 sin exponer detalles internos.
+
+## Pruebas de la API
+
+En la carpeta `postman` está la colección `HabitTracker.postman_collection.json`, lista para importar en Postman. Incluye el flujo completo: registro, login, creación de un hábito, marcado de un día y consulta del resumen.

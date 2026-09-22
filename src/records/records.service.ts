@@ -27,10 +27,10 @@ export class RecordsService {
     return habit;
   }
 
-  async marcar(userId: string, habitId: string, dto: CreateRecordDto) {
+  async marcar(userId: string, habitId: string, createRecordDto: CreateRecordDto) {
     await this.verificarHabito(userId, habitId);
 
-    const date = this.normalizarFecha(dto.date);
+    const date = this.normalizarFecha(createRecordDto.date);
 
     const existente = await this.prisma.habitRecord.findFirst({
       where: { habitId, date },

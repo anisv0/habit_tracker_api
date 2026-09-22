@@ -16,34 +16,34 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(registerDto: RegisterDto) {
     const existente = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { email: registerDto.email },
     });
 
     if (existente) {
       throw new ConflictException('Ya existe una cuenta con ese correo');
     }
 
-    const hash = await bcrypt.hash(dto.password, 10);
+    const hash = await bcrypt.hash(registerDto.password, 10);
 
     const user = await this.prisma.user.create({
-      data: { name: dto.name, email: dto.email, password: hash },
+      data: { name: registerDto.name, email: registerDto.email, password: hash },
     });
 
     return this.construirRespuesta(user);
   }
 
-  async login(dto: LoginDto) {
+  async login(loginDto: LoginDto) {
     const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { email: loginDto.email },
     });
 
     if (!user) {
       throw new UnauthorizedException('Correo o contrasena incorrectos');
     }
 
-    const coincide = await bcrypt.compare(dto.password, user.password);
+    const coincide = await bcrypt.compare(loginDto.password, user.password);
 
     if (!coincide) {
       throw new UnauthorizedException('Correo o contrasena incorrectos');

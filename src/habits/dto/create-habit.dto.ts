@@ -20,6 +20,11 @@ export class CreateHabitDto {
   description?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(30, { message: 'La categoria no puede pasar de 30 caracteres' })
+  category?: string;
+
+  @IsOptional()
   @IsHexColor({ message: 'El color debe ser un hexadecimal valido' })
   color?: string;
 
