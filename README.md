@@ -80,7 +80,7 @@ El servidor queda en `http://localhost:3001`. Todas las rutas usan el prefijo `/
 | Modelo | Descripción |
 | --- | --- |
 | `User` | Cuenta de la persona: nombre, correo y contraseña cifrada |
-| `Habit` | Hábito creado por un usuario: nombre, descripción, categoría y color |
+| `Habit` | Hábito creado por un usuario: nombre, descripción, categoría, color, frecuencia, prioridad, fechas de inicio y fin, y si está activo |
 | `HabitRecord` | Un día marcado como cumplido para un hábito |
 
 Un usuario tiene muchos hábitos y un hábito tiene muchos registros. Al borrar un usuario se borran sus hábitos, y al borrar un hábito se borran sus registros.

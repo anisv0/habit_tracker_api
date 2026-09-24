@@ -1,10 +1,15 @@
 import {
+  IsDateString,
   IsHexColor,
+  IsIn,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+export const FRECUENCIAS = ['diaria', 'semanal', 'personalizada'];
+export const PRIORIDADES = ['alta', 'media', 'baja'];
 
 export class CreateHabitDto {
   @IsString()
@@ -31,4 +36,24 @@ export class CreateHabitDto {
   @IsOptional()
   @IsString()
   icon?: string;
+
+  @IsOptional()
+  @IsIn(FRECUENCIAS, {
+    message: 'La frecuencia debe ser diaria, semanal o personalizada',
+  })
+  frequency?: string;
+
+  @IsOptional()
+  @IsIn(PRIORIDADES, {
+    message: 'La prioridad debe ser alta, media o baja',
+  })
+  priority?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'La fecha de inicio no es valida' })
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'La fecha de fin no es valida' })
+  endDate?: string;
 }
